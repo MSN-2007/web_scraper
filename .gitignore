@@ -1,0 +1,10 @@
+.env
+*.csv
+__pycache__/
+venv/
+.agents/
+.gemini/
+.vscode/
+.idea/
+scraped_data/
+*.pyc
