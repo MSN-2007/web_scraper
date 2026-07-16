@@ -121,32 +121,20 @@ GEMINI_API_KEY=your_google_gemini_api_key_here
 
 ### 4. Running the Application
 
-You can execute the scraper in two modes:
-
-#### 🖥️ Web Dashboard (GUI Mode)
-For a visual, glassmorphic panel with streaming console logs:
+You can execute the scraper using our unified launcher script:
 
 - **Windows (PowerShell)**:
   ```powershell
-  .\venv\Scripts\python.exe main.py
+  .\venv\Scripts\python.exe run.py
   ```
 - **macOS / Linux**:
   ```bash
-  ./venv/bin/python main.py
+  ./venv/bin/python run.py
   ```
-Open your browser and navigate to `http://127.0.0.1:8000`.
 
-#### 💻 Developer Console (TUI Mode)
-To run crawls and inspect extracted outputs directly in the console:
-
-- **Windows (PowerShell)**:
-  ```powershell
-  .\venv\Scripts\python.exe tui.py
-  ```
-- **macOS / Linux**:
-  ```bash
-  ./venv/bin/python tui.py
-  ```
+Upon executing the command, you will be prompted to select your execution environment:
+- **Option 1: Web Dashboard (GUI/Browser Mode)**: Boots the FastAPI backend server and automatically opens the visual dashboard inside your default web browser.
+- **Option 2: Developer Console (TUI Wizard Mode)**: Launches the interactive CLI scraper wizard inside your terminal command-line prompt.
 
 ---
 
