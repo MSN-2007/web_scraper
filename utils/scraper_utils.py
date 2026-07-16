@@ -51,6 +51,7 @@ def get_llm_strategy(api_key: str, schema_config: Dict[str, Any], schema_model: 
     instruction = (
         "Extract all item objects with the following properties from the content:\n"
         + "\n".join([f"- {desc}" for desc in active_field_descriptions])
+        + "\n\nCRITICAL: If any of the requested properties are not present or not available in the content, set their value strictly to null."
     )
 
     # https://docs.crawl4ai.com/api/strategies/#llmextractionstrategy

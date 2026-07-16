@@ -30,10 +30,10 @@ CLR_BOLD = "\033[1m"
 CLR_RESET = "\033[0m"
 
 # State variables
-current_url = "https://www.justdial.com/Zahirabad/Hospitals-in-Zaheerabad-Main-Road/nct-10253670"
-css_selector = "div.resultbox"
+current_url = "https://datoms.io/cold-storage-monitoring/"
+css_selector = "body"
 folder_name = "scraped_data"
-file_name = "venues.csv"
+file_name = "scraped_output.csv"
 schema_config = json.loads(json.dumps(EXTRACTION_SCHEMA))  # Deep copy default schema
 api_key = os.getenv("GEMINI_API_KEY", "")
 
@@ -43,69 +43,103 @@ def clear_screen():
 def print_header(title):
     print(f"\n{CLR_HEADER}{CLR_BOLD}=== {title} ==={CLR_RESET}")
 
-async def analyze_prompt_with_gemini(prompt_text):
+def await_enter():
+    input(f"\nPress {CLR_BOLD}[Enter]{CLR_RESET} to continue...")
+
+async def run_setup_wizard():
     """
-    Connects directly to Gemini API to parse natural language requirements
-    and map them to active/deactivated schema fields.
+    Step-by-step developer TUI setup wizard matching the OpenClaw / Hermes flow.
     """
-    global api_key
-    token = api_key or os.getenv("GEMINI_API_KEY")
-    if not token:
-        print(f"{CLR_RED}Error: Gemini API Key is required. Set it in `.env` or input it in Settings.{CLR_RESET}")
-        return
+    global api_key, current_url, css_selector, folder_name, file_name, schema_config
+    
+    clear_screen()
+    print(f"{CLR_BLUE}{CLR_BOLD}")
+    print("┌──────────────────────────────────────────────┐")
+    print("│   ⚡ Crawl4AI Step-by-Step Scraper Wizard ⚡  │")
+    print("└──────────────────────────────────────────────┘")
+    print(CLR_RESET)
+
+    # Step 1: API / Credentials
+    print_header("Step 1: Credentials & API Keys")
+    env_key = os.getenv("GEMINI_API_KEY", "")
+    key_hint = f" [Default: ...{env_key[-8:]}]" if env_key else ""
+    user_key = input(f"Enter Gemini API Key{key_hint}: ").strip()
+    if user_key:
+        api_key = user_key
+    elif env_key:
+        api_key = env_key
+
+    # Step 2: Target URL
+    print_header("Step 2: Target Web URL")
+    url_input = input(f"Enter URL to scrape [Default: {current_url}]: ").strip()
+    if url_input:
+        current_url = url_input
+
+    # Step 3: CSS Selector
+    print_header("Step 3: Target CSS Selector")
+    selector_input = input(f"Enter CSS Selector [Default: {css_selector}]: ").strip()
+    if selector_input:
+        css_selector = selector_input
+
+    # Step 4: Information / Fields to Scrape (Space then Enter)
+    print_header("Step 4: Fields to Scrape")
+    print("Enter the fields/information you want to extract, separated by spaces (then press Enter).")
+    print(f"E.g., '{CLR_GREEN}name address phone_number capacity{CLR_RESET}'")
+    print(f"Current default library: {', '.join(schema_config.keys())}\n")
+    
+    fields_line = input("Fields to extract: ").strip()
+    if fields_line:
+        fields_list = fields_line.split()
         
-    print(f"\n{CLR_YELLOW}Querying Gemini NLP engine to analyze: '{prompt_text}'...{CLR_RESET}")
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={token}"
-    
-    fields_info = {
-        key: val.get("description", "")
-        for key, val in schema_config.items()
-    }
-    
-    prompt = (
-        f"You are an AI assistant configured to map a user's natural language request to a scraping schema configuration.\n\n"
-        f"User prompt: \"{prompt_text}\"\n\n"
-        f"Here is the list of available fields and their descriptions:\n"
-        f"{json.dumps(fields_info, indent=2)}\n\n"
-        f"For each field, determine if the user's request suggests they want to extract this field.\n"
-        f"Always keep 'name' as true.\n"
-        f"Respond ONLY with a JSON object where keys are the field names and values are booleans (true if active, false otherwise).\n"
-        f"Do not include any explanation or markdown formatting."
-    )
-    
-    payload = {
-        "contents": [{
-            "parts": [{
-                "text": prompt
-            }]
-        }],
-        "generationConfig": {
-            "responseMimeType": "application/json"
-        }
-    }
-    
-    try:
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
-        with urllib.request.urlopen(req, timeout=15) as response:
-            res_data = json.loads(response.read().decode("utf-8"))
-            text_response = res_data["candidates"][0]["content"]["parts"][0]["text"]
-            active_mapping = json.loads(text_response.strip())
+        # Deactivate all existing fields first (except name which is required)
+        for key in schema_config.keys():
+            schema_config[key]["active"] = (key == "name")
             
-            # Update schema config
-            for key in schema_config.keys():
-                if key == "name":
-                    schema_config[key]["active"] = True
-                else:
-                    schema_config[key]["active"] = bool(active_mapping.get(key, False))
-            
-            print(f"{CLR_GREEN}Success! Schema updated successfully.{CLR_RESET}")
-    except Exception as e:
-        print(f"{CLR_RED}Failed to analyze prompt with Gemini: {e}{CLR_RESET}")
+        # Activate matching fields or dynamically create new custom fields
+        for field in fields_list:
+            field_lower = field.lower()
+            if field_lower in schema_config:
+                schema_config[field_lower]["active"] = True
+            else:
+                # Add custom field dynamically ("if other we need we can add in other")
+                schema_config[field_lower] = {
+                    "active": True,
+                    "type": "str",
+                    "description": f"The extracted {field_lower} details from the webpage content."
+                }
+                print(f"  -> Added new custom field: '{CLR_YELLOW}{field_lower}{CLR_RESET}'")
+
+    # Step 5: Location to Store Data
+    print_header("Step 5: Output Storage Location")
+    f_folder = input(f"Enter output folder [Default: {folder_name}]: ").strip()
+    if f_folder:
+        folder_name = f_folder
+        
+    f_file = input(f"Enter CSV file name [Default: {file_name}]: ").strip()
+    if f_file:
+        file_name = f_file
+
+    # Review settings
+    await display_summary_and_confirm()
+
+async def display_summary_and_confirm():
+    clear_screen()
+    print_header("Scraper Configuration Summary")
+    print(f"{CLR_BLUE}Gemini API Key: {CLR_RESET}{'Set (credentials loaded)' if api_key else CLR_RED + 'Missing!' + CLR_RESET}")
+    print(f"{CLR_BLUE}Target URL:     {CLR_RESET}{current_url}")
+    print(f"{CLR_BLUE}CSS Selector:   {CLR_RESET}{css_selector}")
+    print(f"{CLR_BLUE}Storage Path:   {CLR_RESET}{folder_name}/{file_name}")
+    
+    active_fields = [k for k, v in schema_config.items() if v.get("active", False)]
+    print(f"{CLR_BLUE}Active Fields:  {CLR_RESET}{CLR_GREEN}{', '.join(active_fields)}{CLR_RESET}")
+    print("-" * 50)
+    
+    confirm = input(f"\n{CLR_BOLD}Start scraping session now? (y/n): {CLR_RESET}").strip().lower()
+    if confirm == 'y' or confirm == 'yes':
+        await run_crawler_session()
+    else:
+        print(f"\n{CLR_YELLOW}Scrape aborted. Returning to settings menu.{CLR_RESET}")
+        await_enter()
 
 def display_schema_checklist():
     """
@@ -153,7 +187,7 @@ async def run_crawler_session():
     global api_key
     token = api_key or os.getenv("GEMINI_API_KEY")
     if not token:
-        print(f"{CLR_RED}Error: Gemini API Key is required. Set it in `.env` or option 5.{CLR_RESET}")
+        print(f"{CLR_RED}Error: Gemini API Key is required to run the session.{CLR_RESET}")
         await_enter()
         return
 
@@ -211,7 +245,7 @@ async def run_crawler_session():
                     break
                     
                 all_venues.extend(venues)
-                print(f"{CLR_GREEN}[SUCCESS]{CLR_RESET} Extracted {len(venues)} venues from Page {page_number}. (Total: {len(all_venues)})")
+                print(f"{CLR_GREEN}[SUCCESS]{CLR_RESET} Extracted {len(venues)} items from Page {page_number}. (Total: {len(all_venues)})")
                 
                 page_number += 1
                 await asyncio.sleep(2)  # Polite delay
@@ -227,9 +261,6 @@ async def run_crawler_session():
         print(f"\n{CLR_RED}Fatal Error during crawl: {e}{CLR_RESET}")
         
     await_enter()
-
-def await_enter():
-    input(f"\nPress {CLR_BOLD}[Enter]{CLR_RESET} to continue...")
 
 def update_settings():
     global current_url, css_selector, folder_name, file_name, api_key
@@ -258,7 +289,10 @@ def update_settings():
             api_key = input("Enter Gemini API Key: ").strip() or api_key
 
 async def main():
-    global schema_config
+    # Run the setup wizard on startup
+    await run_setup_wizard()
+    
+    # After the setup wizard, let user repeat or change configurations
     while True:
         clear_screen()
         print(f"{CLR_BLUE}{CLR_BOLD}")
@@ -276,10 +310,10 @@ async def main():
         print(f"- Active Keys:  {CLR_GREEN}{', '.join(active_fields)}{CLR_RESET}")
         
         print("\n" + "=" * 50)
-        print(f"{CLR_BOLD}Main Menu Options:{CLR_RESET}")
-        print(f"1. {CLR_BOLD}Set Target URL & File Paths{CLR_RESET}")
-        print(f"2. {CLR_BOLD}Enter NLP Extraction Request (Simple Language){CLR_RESET}")
-        print(f"3. {CLR_BOLD}Configure Schema Fields Checklist{CLR_RESET}")
+        print(f"{CLR_BOLD}Options Menu:{CLR_RESET}")
+        print(f"1. {CLR_BOLD}Run Setup Wizard Again ⚡{CLR_RESET}")
+        print(f"2. {CLR_BOLD}Modify Specific Settings (API Key, URL, folder, etc.){CLR_RESET}")
+        print(f"3. {CLR_BOLD}View / Toggle Schema Library Checklist{CLR_RESET}")
         print(f"4. {CLR_GREEN}{CLR_BOLD}Initiate Scraper Session 🚀{CLR_RESET}")
         print(f"5. {CLR_RED}Exit{CLR_RESET}")
         print("=" * 50)
@@ -287,13 +321,9 @@ async def main():
         choice = input("\nEnter choice (1-5): ").strip()
         
         if choice == '1':
-            update_settings()
+            await run_setup_wizard()
         elif choice == '2':
-            print_header("Describe What to Scrape (Simple Language)")
-            prompt = input("Describe required data (e.g., 'I want name, address, website'): ").strip()
-            if prompt:
-                await analyze_prompt_with_gemini(prompt)
-                await_enter()
+            update_settings()
         elif choice == '3':
             display_schema_checklist()
         elif choice == '4':
