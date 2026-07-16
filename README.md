@@ -125,16 +125,28 @@ You can execute the scraper in two modes:
 
 #### 🖥️ Web Dashboard (GUI Mode)
 For a visual, glassmorphic panel with streaming console logs:
-```bash
-python main.py
-```
+
+- **Windows (PowerShell)**:
+  ```powershell
+  .\venv\Scripts\python.exe main.py
+  ```
+- **macOS / Linux**:
+  ```bash
+  ./venv/bin/python main.py
+  ```
 Open your browser and navigate to `http://127.0.0.1:8000`.
 
 #### 💻 Developer Console (TUI Mode)
-To run scrapes directly inside your terminal without opening a browser:
-```bash
-python tui.py
-```
+To run crawls and inspect extracted outputs directly in the console:
+
+- **Windows (PowerShell)**:
+  ```powershell
+  .\venv\Scripts\python.exe tui.py
+  ```
+- **macOS / Linux**:
+  ```bash
+  ./venv/bin/python tui.py
+  ```
 
 ---
 
