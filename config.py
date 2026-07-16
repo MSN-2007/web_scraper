@@ -7,63 +7,63 @@ EXTRACTION_SCHEMA = {
     "name": {
         "active": True,
         "type": "str",
-        "description": "The official name of the business, hospital, clinic, or venue."
+        "description": "The official brand, website, business, or venue name."
+    },
+    "colors": {
+        "active": True,
+        "type": "str",
+        "description": "The main color palette (primary, secondary, backgrounds, text colors) as hex/rgb values."
+    },
+    "typography": {
+        "active": True,
+        "type": "str",
+        "description": "Font families, font sizes, weights, and text styling details used across the page."
+    },
+    "components": {
+        "active": True,
+        "type": "str",
+        "description": "Key UI components identified (e.g. hero section, navigation bars, cards, grid items, CTA buttons)."
+    },
+    "spacing_and_grid": {
+        "active": False,
+        "type": "str",
+        "description": "Grid alignments, margins, padding system, and spacing rules observed."
+    },
+    "logo_url": {
+        "active": False,
+        "type": "str",
+        "description": "The source URL of the official brand logo image."
+    },
+    "assets_list": {
+        "active": False,
+        "type": "str",
+        "description": "Urls of key images, icons, illustrations, and visual assets used."
     },
     "address": {
-        "active": True,
+        "active": False,
         "type": "str",
         "description": "The complete physical address, location description, or landmark."
     },
     "phone_number": {
-        "active": True,
-        "type": "str",
-        "description": "The telephone or contact phone number."
-    },
-    "timings": {
-        "active": True,
-        "type": "str",
-        "description": "Working hours or operation timings (e.g., Open 24 Hrs, 9:00 AM - 5:00 PM)."
-    },
-    "rating": {
-        "active": False,
-        "type": "float",
-        "description": "The numerical user rating score (e.g., 4.5) out of 5 stars."
-    },
-    "reviews_count": {
-        "active": False,
-        "type": "int",
-        "description": "The total number of customer reviews or ratings."
-    },
-    "website": {
         "active": False,
         "type": "str",
-        "description": "The official website link or URL."
+        "description": "The contact telephone or phone number."
     },
     "email": {
         "active": False,
         "type": "str",
         "description": "The contact email address."
     },
-    "price": {
+    "website": {
         "active": False,
         "type": "str",
-        "description": "Pricing details, costs, fees, or price range info."
-    },
-    "services": {
-        "active": False,
-        "type": "str",
-        "description": "Specific services, facilities, specialties, or products offered."
-    },
-    "description": {
-        "active": False,
-        "type": "str",
-        "description": "A concise description summarizing their offerings or business."
+        "description": "The official website link or URL."
     }
 }
 
-# Default search configurations (can be overridden in the Web UI)
-BASE_URL = "https://www.justdial.com/Zahirabad/Hospitals-in-Zaheerabad-Main-Road/nct-10253670"
-CSS_SELECTOR = "div.resultbox"
+# Default search configurations (can be overridden in the Web UI or TUI)
+BASE_URL = "https://datoms.io/cold-storage-monitoring/"
+CSS_SELECTOR = "body"
 
 # Minimum required keys for a record to be considered complete
 REQUIRED_KEYS = ["name"]
