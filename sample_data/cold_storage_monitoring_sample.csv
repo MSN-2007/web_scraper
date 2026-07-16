@@ -1,0 +1,7 @@
+feature_name,description,parameters_tracked,benefits
+Real-time Temperature & Humidity Monitoring,Continuous tracking of thermal conditions inside refrigerators and storage zones.,"Temperature, Humidity","Ensures product quality, prevents spoilage, and safeguards vaccines/food items"
+Instant Alerts & Excursion Notifications,Real-time SMS and email alerts triggered immediately when sensor readings cross predefined safe thresholds.,"Temperature excursion, Sensor failure, Power loss","Enables quick corrective actions to protect sensitive cold chain cargo"
+Automated Compliance Reporting,Generates audit-ready digital reports to simplify compliance with regulatory bodies.,"Historical temperature logs, Excursion history","Ensures compliance with FDA Title 21 CFR Part 11, HACCP, WHO, and GAMP guidelines"
+Power Status & Backup Battery Tracking,Tracks main utility power availability and backup battery health to prevent hardware downtime.,"Main power status, Backup battery voltage","Prevents data gaps and system downtime during power grid failures"
+Asset Location & Transit Tracking,GPS tracking for refrigerated vehicles and mobile containers moving goods through the cold chain.,"GPS coordinates, Speed, Route status","Enables real-time location monitoring and transit ETA estimation"
+Door Open & Intrusion Monitoring,Detects and logs refrigerator door openings to avoid thermal leaking and unauthorized access.,"Door open/close state, Opening duration","Minimizes thermal loss, saves energy, and improves security"
