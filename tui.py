@@ -254,6 +254,16 @@ async def run_crawler_session():
             save_venues_to_csv(all_venues, csv_filepath, fieldnames=active_fields)
             print(f"\n{CLR_GREEN}{CLR_BOLD}★ Crawling completed successfully!{CLR_RESET}")
             print(f"Saved {len(all_venues)} structured items in '{csv_filepath}'.")
+            
+            # Print the extracted data directly in the terminal as requested
+            print_header("Extracted Data (Console View)")
+            for idx, item in enumerate(all_venues, start=1):
+                print(f"\n{CLR_BOLD}{CLR_CYAN}Item {idx}:{CLR_RESET}")
+                for key in active_fields:
+                    val = item.get(key)
+                    val_str = f"{CLR_RED}null{CLR_RESET}" if val is None or val == "" else f"{CLR_GREEN}{val}{CLR_RESET}"
+                    print(f"  {CLR_BOLD}{key:<18}:{CLR_RESET} {val_str}")
+                print(f"{CLR_BLUE}" + "-" * 40 + f"{CLR_RESET}")
         else:
             print(f"\n{CLR_YELLOW}No items were extracted. CSV file not generated.{CLR_RESET}")
             
